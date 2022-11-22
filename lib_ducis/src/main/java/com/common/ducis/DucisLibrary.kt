@@ -3,11 +3,11 @@ package com.common.ducis
 import android.app.Application
 import android.content.Context
 import com.common.ducis.commonutil.MySharedPreferences
-import com.common.ducis.commonutil.file.FileUtils
+import com.common.ducis.file.FileUtils
 import com.common.ducis.commonutil.log.MyLog
 import com.common.ducis.commonutil.toast.ToastConfig
 import com.common.ducis.exception.CrashCatchHandler
-import com.common.ducis.network.bean.common.ProxyBeanView
+import com.common.ducis.component.network.bean.common.ProxyBeanView
 
 /**
  * @ClassName: DucisLibrary
@@ -51,11 +51,11 @@ object DucisLibrary {
      * 初始化代理
      */
     fun initProxy(context:Context,vararg params:String){
-        var ipList = MySharedPreferences.getListData(context,"ipList",ProxyBeanView::class.java)
+        var ipList = MySharedPreferences.getListData(context,"ipList", com.common.ducis.component.network.bean.common.ProxyBeanView::class.java)
         if (ipList.isNullOrEmpty()){
             ipList = mutableListOf()
             params.forEach {
-                ipList.add(ProxyBeanView(it,1000))
+                ipList.add(com.common.ducis.component.network.bean.common.ProxyBeanView(it, 1000))
             }
             MySharedPreferences.putListData(context,"ipList",ipList)
             MyLog.i("ipList","新存入ip：$ipList")

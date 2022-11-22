@@ -17,7 +17,7 @@
         android:usesCleartextTraffic="true">
 
         <activity
-            android:name=".ui.permission.AcpActivity"
+            android:name=".component.permission.AcpActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|fontScale"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
