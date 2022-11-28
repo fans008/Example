@@ -1,8 +1,8 @@
 package com.common.ducis.base
 
 import android.util.Log
-import com.common.ducis.network.common.ParseResult
-import com.common.ducis.network.common.ResponseData
+import com.common.ducis.component.network.common.ParseResult
+import com.common.ducis.component.network.common.ResponseData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

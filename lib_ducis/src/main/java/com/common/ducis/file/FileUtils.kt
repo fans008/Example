@@ -14,7 +14,7 @@ import android.provider.OpenableColumns
 import android.text.TextUtils
 import androidx.core.content.FileProvider
 import com.common.ducis.DucisLibrary
-import com.common.ducis.file.FileHelper.fileDefaultPath
+import com.common.ducis.file.OutsideFileHelper.fileDefaultPath
 import java.io.*
 import java.lang.Exception
 import java.math.BigInteger
