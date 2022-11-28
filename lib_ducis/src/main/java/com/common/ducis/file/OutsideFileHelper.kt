@@ -7,11 +7,11 @@ import java.util.*
 
 /**
  * 类功能描述：文件操作辅助类
- *
+ * 外部sd卡
  */
-object FileHelper {
-    private var userID = "ducis"
+object OutsideFileHelper {
     private val baseFilePath = Environment.getExternalStorageDirectory().toString() + "/filedownloader"
+    private var userID = "ducis"
 
     /** 创建文件 */
     @JvmStatic

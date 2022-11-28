@@ -4,130 +4,135 @@ apply plugin: 'signing'
 def GROUP_ID = 'io.github.fans008'//改成第一步申请上传权限时填写的Group Id
 def ARTIFACT_ID = 'fansLib' //随意命名 你自己编写的第三方库的名称
 def VERSION_NAME = '1.0.0' //版本
-def DESCRIPTION = '基础功能库'
-def GIT_LOCATION = 'github.com/fans008/fansLib.git' //github项目的链接
+def DESCRIPTION = 'BaseFansLib'
+def GIT_LOCATION = 'github.com/fans008/Example.git' //github项目的链接
 def GIT_LOCATION_URL = 'https://' + GIT_LOCATION
 
 //仓库地址
 def MAVEN_URL = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+def SNAPSHOTS_REPO_URL  = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
 def nexusUsername = 'ftt' //Sonatype账号
 def nexusPassword = 'Fan..3939539'//Sonatype账号密码
+def nexusEmail = '920563087@qq.com'//Sonatype邮箱
 
-task sourceJar(type: Jar) {
-    if (hasAndroidPlugin()) {
-        println "======> Android"
-        from android.sourceSets.main.java.srcDirs
-        //noinspection GroovyAccessibility
-        archiveClassifier = 'sources'
-    } else if (hasJavaPlugin()) {
-        println "======> Java"
-        from sourceSets.main.allSource
-        //noinspection GroovyAccessibility
-        archiveClassifier = 'sources'
-    }
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.source
+
+    exclude "**/R.class"  //排除`R.class`
+    exclude "**/BuildConfig.class"  //排除`BuildConfig.class`
 }
 
-afterEvaluate { project ->
-    tasks.all { Task task ->
-        if(task.name.equalsIgnoreCase('publishAarPomPublishPublicationToSimpleCompressRepository')) {
-            task.dependsOn tasks.getByName('assemble')
-        }
-    }
+//--- 修改配置一 ---
+ext {path=
+        PUBLISH_GROUP_ID = GROUP_ID
+    PUBLISH_ARTIFACT_ID = ARTIFACT_ID
+    PUBLISH_VERSION = VERSION_NAME
 }
 
-def hasJavaPlugin() {
-    if (plugins.hasPlugin("java-library")) {
-        return true
-    }
-    return false
-}
+//--- 修改配置二 ---
+ext["signing.keyId"] = ''
+ext["signing.password"] = ''
+ext["signing.secretKeyRingFile"] = ''
+ext["ossrhUsername"] = ''
+ext["ossrhPassword"] = ''
 
-def hasAndroidPlugin() {
-    if (plugins.hasPlugin("com.android.library")) {
-        return true
+File secretPropsFile = project.rootProject.file('gradle.properties')
+if (secretPropsFile.exists()) {
+    println "Found secret props file, loading props"
+    Properties p = new Properties()
+    p.load(new FileInputStream(secretPropsFile))
+    p.each { name, value ->
+        ext[name] = value
     }
-    return false
+} else {
+    println "No props file, loading env vars"
 }
-
 publishing {
-    println "======> ${project.name}"
-    println "====> the aar path is " + "$buildDir/outputs/aar/${project.name}-release.aar"
-    println "====>" + MAVEN_URL
-    println "====>" + VERSION_NAME
     publications {
-        aarPomPublish(MavenPublication) {
-            groupId GROUP_ID
-            artifactId ARTIFACT_ID
-            version VERSION_NAME
-            artifact(sourceJar)
-            artifact("$buildDir/outputs/aar/${project.name}-release.aar")
+        release(MavenPublication) {
+            println("publish-maven Log-------> PUBLISH_GROUP_ID: $PUBLISH_GROUP_ID; PUBLISH_ARTIFACT_ID: $PUBLISH_ARTIFACT_ID; PUBLISH_VERSION: $PUBLISH_VERSION")
+            // The coordinates of the library, being set from variables that
+            // we'll set up in a moment
+
+            //配置一传入的参数
+            groupId PUBLISH_GROUP_ID
+            artifactId PUBLISH_ARTIFACT_ID
+            version PUBLISH_VERSION
+
+            // Two artifacts, the `aar` and the sources
+            artifact("$buildDir/outputs/aar/${project.getName()}-release.aar")
+            artifact androidSourcesJar
+
+            // Self-explanatory metadata for the most part
             pom {
-                packaging 'aar'
-                name = ARTIFACT_ID
-                description = DESCRIPTION
-                url = GIT_LOCATION_URL
+                //--- 修改配置三 ---
+                name = PUBLISH_ARTIFACT_ID
+                description = '上传aar插件至mavencentral，方便使用implementation快速引入' //添加文件描述
+                // If your project has a dedicated site, use its URL here
+                url = GIT_LOCATION_URL //项目github链接
                 licenses {
                     license {
+                        //协议类型，一般默认Apache License2.0的话不用改：
                         name = 'The Apache License, Version 2.0'
                         url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
                     }
                 }
                 developers {
                     developer {
-                        id = 'ftt'
-                        name = 'ftt'//用户名
-                        email = '920563087@qq.com'申请Sonatype账号时的邮箱地址
+                        //--- 修改配置四 ---
+                        id = nexusUsername     //你的sonatype用户ID
+                        name = nexusUsername   //你的sonatype用户名
+                        email = nexusEmail    //你的sonatype注册邮箱
                     }
                 }
+                // Version control info, if you're using GitHub, follow the format as seen here
                 scm {
+                    //--- 修改配置五 ---
+                    //修改成你的Git地址：
                     connection = 'scm:git:' + GIT_LOCATION + '.git'
                     developerConnection = 'scm:git:ssh://' + GIT_LOCATION + '.git'
                     url = GIT_LOCATION_URL
+                    //分支地址：
                 }
-            }
-            pom.withXml {
-                //asNode().appendNode('测试').appendNode('自定义key', '自定义value')
-                def dependenciesNode = asNode().appendNode('dependencies')
-                configurations.implementation.allDependencies.each {
-                    if (it.version != "unspecified") { // 过滤项目内library引用
-                        println "=====>" + it.properties
-                        println "=====>" + it.group + "  " + it.name + it.version
-                        if (it.group == null || it.name == null || it.version == null) return
-                        if (it.group == group) return
+                // A slightly hacky fix so that your POM will include any transitive dependencies
+                // that your library builds upon
+                withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+
+                    project.configurations.implementation.allDependencies.each {
                         def dependencyNode = dependenciesNode.appendNode('dependency')
                         dependencyNode.appendNode('groupId', it.group)
                         dependencyNode.appendNode('artifactId', it.name)
                         dependencyNode.appendNode('version', it.version)
-
-                        if (it.excludeRules.size() > 0) {
-                            def exclusionsNode = dependencyNode.appendNode('exclusions')
-                            it.excludeRules.each { rule ->
-                                def exclusionNode = exclusionsNode.appendNode('exclusion')
-                                exclusionNode.appendNode('groupId', rule.group)
-                                exclusionNode.appendNode('artifactId', rule.module)
-                            }
-                        }
                     }
                 }
             }
         }
     }
-
     repositories {
+        // The repository to publish to, Sonatype/MavenCentral
         maven {
-            name "simpleCompress"
-            url MAVEN_URL
+            // This is an arbitrary name, you may also use "mavencentral" or
+            // any other name that's descriptive for you
+
+            //--- 修改配置六 ---
+            name = DESCRIPTION
+            def releasesRepoUrl = MAVEN_URL
+            def snapshotsRepoUrl = SNAPSHOTS_REPO_URL
+            // You only need this if you want to publish snapshots, otherwise just set the URL
+            // to the release repo directly
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+
+            // The username and password we've fetched earlier
             credentials {
-                username = nexusUsername
-                password = nexusPassword
+                username ossrhUsername
+                password ossrhPassword
             }
         }
     }
 }
-
-// signing 必须在 publishing 配置之后
 signing {
-    sign publishing.publications.aarPomPublish
+    sign publishing.publications
 }
-
 
