@@ -1,4 +1,4 @@
-package com.common.ducis.component.network.common
+package com.common.ducis.component.network.bean
 
 /**
  * @ClassName: BaseListResult

@@ -6,7 +6,7 @@ package com.common.ducis.component.network
  * @Author: Fan TaoTao
  * @Date: 2022/3/2
  */
-object HttpConfig {
+internal object HttpConfig {
     const val BASE_URL = ""
     //请求类型（后台识别）
     const val head_request_type_key = "m-request-type"

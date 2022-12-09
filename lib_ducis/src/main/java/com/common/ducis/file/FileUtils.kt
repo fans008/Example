@@ -24,20 +24,21 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 object FileUtils {
+    private val baseFilePath = Environment.getExternalStorageDirectory().toString() + "/fileDownloader"
     const val DOCUMENTS_DIR = "documents"
     const val SIZETYPE_B = 1 //获取文件大小单位为B的double值
     const val SIZETYPE_KB = 2 //获取文件大小单位为KB的double值
     const val SIZETYPE_MB = 3 //获取文件大小单位为MB的double值
     const val SIZETYPE_GB = 4 //获取文件大小单位为GB的double值
     var APP_DIR = fileDefaultPath
-    var RECORD_DIR = APP_DIR + "/record/"
-    var RECORD_DOWNLOAD_DIR = APP_DIR + "/record/download/"
-    var VIDEO_DOWNLOAD_DIR = APP_DIR + "/video/download/"
-    var IMAGE_BASE_DIR = APP_DIR + "/image/"
+    var RECORD_DIR = "$APP_DIR/record/"
+    var RECORD_DOWNLOAD_DIR = "$APP_DIR/record/download/"
+    var VIDEO_DOWNLOAD_DIR = "$APP_DIR/video/download/"
+    var IMAGE_BASE_DIR = "$APP_DIR/image/"
     var IMAGE_DOWNLOAD_DIR = IMAGE_BASE_DIR + "download/"
-    var MEDIA_DIR = APP_DIR + "/media"
-    var FILE_DOWNLOAD_DIR = APP_DIR + "/file/download/"
-    var CRASH_LOG_DIR = APP_DIR + "/crash/"
+    var MEDIA_DIR = "$APP_DIR/media"
+    var FILE_DOWNLOAD_DIR = "$APP_DIR/file/download/"
+    var CRASH_LOG_DIR = "$APP_DIR/crash/"
     fun initPath() {
         var f = File(MEDIA_DIR)
         if (!f.exists()) {

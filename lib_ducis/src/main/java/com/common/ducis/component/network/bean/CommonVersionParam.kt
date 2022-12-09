@@ -1,4 +1,4 @@
-package com.common.ducis.component.network.bean.common
+package com.common.ducis.component.network.bean
 
 /**
  * @ClassName: CommonVersionParam

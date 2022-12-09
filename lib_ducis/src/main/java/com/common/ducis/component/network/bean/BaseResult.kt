@@ -1,4 +1,4 @@
-package com.common.ducis.component.network.common
+package com.common.ducis.component.network.bean
 
 
 /**
@@ -15,11 +15,12 @@ open class BaseResult<T> {
     fun isSuccess():Boolean{
         return status?.uppercase() == "SUCCESS"
     }
-    override fun toString(): String {
-        return "BaseResult(status=$status, message=$message, data=$data)"
-    }
 
     fun getResultData():T?{
         return data
+    }
+
+    override fun toString(): String {
+        return "BaseResult(status=$status, message=$message, data=$data)"
     }
 }

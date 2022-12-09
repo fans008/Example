@@ -12,6 +12,7 @@ import android.provider.Settings
 import com.common.ducis.commonutil.Md5Utils
 import com.common.ducis.commonutil.log.MyLog
 import com.common.ducis.commonutil.toast.toast
+import com.common.ducis.component.network.bean.CommonVersionView
 import com.common.ducis.component.permission.Acp
 import com.common.ducis.component.permission.AcpListener
 import com.common.ducis.component.permission.AcpOptions
@@ -37,7 +38,7 @@ object DownLoadApk {
 
     fun downloadApk(
         mContext: Context,
-        versionBean: com.common.ducis.component.network.bean.common.CommonVersionView,
+        versionBean: CommonVersionView,
         checkNum: String?
     ) {
         DownLoadApk.checkNum = checkNum
